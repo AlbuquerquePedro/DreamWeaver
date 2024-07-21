@@ -1,6 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
+from flask import Flask
+
+app = Flask(__name__)
 
 db_uri = os.environ.get("DATABASE_URI", "sqlite:///dreams.db")
 
@@ -15,8 +18,7 @@ class Dream(db.Model):
     content = db.Column(db.Text, nullable=False)
     date = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-
-    analyses = db.relationship('Analysis', backref='dream', lazy='dynamic')
+    analyses = db.relationship('Analysis', backref='dream', lazy=True)
 
     def __repr__(self):
         return f'<Dream {self.title}>'
@@ -32,4 +34,4 @@ class Analysis(db.Model):
         return f'<Analysis for Dream ID {self.dream_id}>'
 
 if __name__ == '__main__':
-    db.createAall()
+    db.create_all()
