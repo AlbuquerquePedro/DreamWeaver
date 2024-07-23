@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
-from flask import Flask
+from flask import Flask, jsonify
 
 app = Flask(__name__)
 
@@ -34,4 +34,18 @@ class Analysis(db.Model):
         return f'<Analysis for Dream ID {self.dream_id}>'
 
 if __name__ == '__main__':
-    db.create_all()
+    try:
+        db.create_all()
+    except Exception as e:
+        print(f"An error occurred while creating the database tables: {str(e)}")
+
+@app.route('/add_dream', methods=['POST'])
+def add_dream():
+    try:
+        new_dream = Dream(title="New Dream", content="Dream Content", user_id=1)
+        db.session.add(new_dream)
+        db.session.commit()
+        return jsonify({"success": "Dream added successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
