@@ -1,10 +1,24 @@
 const API_URL = process.env.REACT_APP_API_URL;
 
+// Caching mechanism
+let dreamsCache = null;
+let lastFetch = -Infinity; // Ensures the first call always fetches
+
 const fetchDreams = async () => {
+    const now = Date.now();
+    // If cached data is less than 60 seconds old, use it
+    if (now - lastFetch < 60000 && dreamsCache !== null) {
+        console.log('Using cached dreams');
+        displayDreams(dreamsCache);
+        return;
+    }
+
     try {
         const response = await fetch(`${API_URL}/dreams`);
         const data = await response.json();
         if (response.ok) {
+            dreamsCache = data; // Update cache
+            lastFetch = Date.now(); // Update fetch timestamp
             displayDreams(data);
         } else {
             throw new Error('Failed to fetch dreams');
@@ -36,6 +50,8 @@ const createDream = async (dream) => {
         if (!response.ok) {
             throw new Error('Failed to create dream');
         }
+        // Invalidate cache and fetch latest dreams
+        dreamsCache = null;
         fetchDreams();
     } catch (error) {
         console.error('Error creating dream:', error);
@@ -54,6 +70,8 @@ const updateDream = async (id, dreamUpdate) => {
         if (!response.ok) {
             throw new Error('Failed to update dream');
         }
+        // Invalidate cache and fetch the latest dreams
+        dreamsCache = null;
         fetchDreams();
     } catch (error) {
         console.error('Error updating dream:', error);
@@ -68,6 +86,8 @@ const deleteDream = async (id) => {
         if (!response.ok) {
             throw new Error('Failed to delete dream');
         }
+        // Invalidate cache and fetch the latest dreams
+        dreamsCache = null;
         fetchDreams();
     } catch (error) {
         console.error('Error deleting dream:', error);
