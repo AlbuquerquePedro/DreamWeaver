@@ -2,22 +2,26 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const Header = () => {
-  // State to handle the toggle for mobile navigation
   const [isNavVisible, setIsNavVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(""); // State to handle potential error messages
 
-  // Function to toggle the navigation visibility
+  // Function to toggle the navigation visibility with basic error handling
   const toggleNav = () => {
-    setIsNavVisible(!isNavVisible);
+    try {
+      setIsNavVisible(!isNavVisible);
+    } catch (error) {
+      console.error("Failed to toggle navigation:", error);
+      setErrorMessage("An error occurred while trying to toggle the navigation. Please try again.");
+    }
   };
 
   return (
     <header>
       <nav>
+        {errorMessage && <p className="error-message">{errorMessage}</p>} {/* Display error message if any */}
         <div className="mobile-nav">
-          {/* Mobile navigation toggle button */}
           <button onClick={toggleNav}>{isNavVisible ? 'Close' : 'Menu'}</button>
         </div>
-        {/* Conditionally render navigation items if isNavVisible is true */}
         {isNavVisible && (
           <ul>
             <li><Link to="/" onClick={toggleNav}>Home</Link></li>
