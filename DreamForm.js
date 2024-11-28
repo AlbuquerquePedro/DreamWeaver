@@ -4,30 +4,48 @@ const DreamForm = ({ onSubmit, dreamData }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [errors, setErrors] = useState({});
+  const [globalError, setGlobalError] = useState('');
 
   useEffect(() => {
-    if (dreamData) {
-      setTitle(dreamData.title || '');
-      setContent(dreamData.content || '');
+    try {
+      if (dreamData) {
+        setTitle(dreamData.title || '');
+        setContent(dreamData.content || '');
+      }
+    } catch (error) {
+      console.error("An error occurred while setting dream data: ", error);
+      setGlobalError("Failed to load dream data.");
     }
   }, [dreamData]);
 
   const validateForm = () => {
     const errors = {};
-    if (!title) errors.title = "Title is required";
-    if (!content) errors.content = "Content is required";
+    setGlobalError(''); // Reset global error state before validation
+    
+    if (!title.trim()) errors.title = "Title is required";
+    if (!content.trim()) errors.content = "Content is required";
     setErrors(errors);
+    
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
     if (!validateForm()) return;
-    onSubmit({ title, content });
+    
+    try {
+      // Assuming onSubmit might be asynchronous. If it's not, you can remove `async` and `await`.
+      await onSubmit({ title, content });
+    } catch (error) {
+      console.error("An error occurred during form submission: ", error);
+      setGlobalError("Failed to submit dream data. Please try again.");
+    }
   };
 
   return (
     <form onSubmit={handleSubmit}>
+      {globalError && <div className="global-error">{globalError}</div>}
       <div>
         <label htmlFor="title">Title</label>
         <input
