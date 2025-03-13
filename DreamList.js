@@ -1,35 +1,37 @@
 import React, { useState, useEffect } from 'react';
 
-const API_URL = process.env.REACT_APP_DREAMS_API_URL;
+const DREAMS_API_URL = process.env.REACT_APP_DREAMS_API_URL;
 
-const DreamList = () => {
-    const [dreams, setDreams] = useState([]);
-    const [loading, setLoading] = useState(true);
+const DreamListViewer = () => {
+    const [dreamList, setDreamList] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        (async () => {
+        async function fetchDreams() {
             try {
-                const response = await fetch(API_URL);
+                const response = await fetch(DREAMS_API_URL);
 
                 if (!response.ok) {
                     throw new Error('Failed to fetch dreams');
                 }
 
-                const data = await response.json();
-                setDreams(data);
+                const dreamsData = await response.json();
+                setDreamList(dreamsData);
             } catch (error) {
-                console.error("Error fetching dreams:", error);
+                console.error("Error while fetching dreams:", error);
             } finally {
-                setLoading(false);
+                setIsLoading(false);
             }
-        })();
+        }
+
+        fetchDreams();
     }, []);
 
-    if (loading) {
+    if (isLoading) {
         return <div>Loading dreams...</div>;
     }
 
-    if (!dreams.length) {
+    if (!dreamList.length) {
         return <div>No dreams found</div>;
     }
 
@@ -37,7 +39,7 @@ const DreamList = () => {
         <div>
             <h2>Dream List</h2>
             <ul>
-                {dreams.map(({ id, title, description }) => (
+                {dreamList.map(({ id, title, description }) => (
                     <li key={id}>
                         <h3>{title}</h3>
                         <p>{description}</p>
@@ -48,4 +50,4 @@ const DreamList = () => {
     );
 };
 
-export default DreamList;
+export default DreamListViewer;
